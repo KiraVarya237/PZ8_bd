@@ -2,14 +2,7 @@
 .env
 .env.example
 
-# База данных разработки
-db.sqlite3
-
 # Виртуальное окружение
 .venv/
 venv/
 
-# Кэш Python
-__pycache__/
-*.py[cod]
-*$py.class
