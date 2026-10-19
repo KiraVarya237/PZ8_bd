@@ -26,18 +26,20 @@
 
                 <div class="mb-3">
                     <label class="form-label text-muted">Роль и права доступа:</label>
-                    <div class="d-flex gap-2 align-items-center">
-                        {% if user.is_superuser %}
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        {% if user.is_superuser or user.is_staff or user.role == 'admin' %}
                             <span class="badge bg-red-lt">
                                  Администратор
                             </span>
                         {% endif %}
 
-                        {% if is_methodist %}
+                        {% if is_methodist or user.role == 'methodist' %}
                             <span class="badge bg-green-lt">
                                  Методист
                             </span>
-                        {% else %}
+                        {% endif %}
+
+                        {% if not user.is_superuser and not user.is_staff and not is_methodist and user.role != 'admin' and user.role != 'methodist' %}
                             <span class="badge bg-blue-lt">
                                  Студент
                             </span>

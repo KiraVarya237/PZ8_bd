@@ -9,13 +9,20 @@
     <div class="col-md-6">
         <h1 class="mb-4">{{ title }}</h1>
 
-        <p>Вы уверены, что хотите удалить <strong>"{{ object }}"</strong>?</p>
+        {% if is_methodist or request.user.is_superuser or request.user.is_staff or request.user.role == 'admin' %}
+            <p>Вы уверены, что хотите удалить <strong>"{{ object }}"</strong>?</p>
 
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Удалить</button>
-            <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>
-        </form>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Удалить</button>
+                <a href="javascript:history.back()" class="btn btn-secondary">Отмена</a>
+            </form>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                У вас нет прав для удаления этого объекта.
+            </div>
+            <a href="javascript:history.back()" class="btn btn-secondary">Назад</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
