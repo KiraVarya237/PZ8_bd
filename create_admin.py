@@ -8,42 +8,63 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-# Данные для администратора
 ADMIN_USERNAME = 'admin'
 ADMIN_EMAIL = 'admin@example.com'
-ADMIN_PASSWORD = 'admin12345678'
+ADMIN_PASSWORD = 'adminpassword123'
 
-# 1. Находим или создаём администратора
-admin_user, created = User.objects.get_or_create(username=ADMIN_USERNAME, defaults={'email': ADMIN_EMAIL})
+# админ
+try:
+    admin_user = User.objects.get(username=ADMIN_USERNAME)
+    print(f"Пользователь '{ADMIN_USERNAME}' найден, обновляем права...")
+except User.DoesNotExist:
+    print(f"Пользователь '{ADMIN_USERNAME}' не найден, создаем...")
+    try:
+        admin_user = User.objects.create_superuser(
+            username=ADMIN_USERNAME,
+            email=ADMIN_EMAIL,
+            password=ADMIN_PASSWORD
+        )
+    except Exception:
+        admin_user = User(username=ADMIN_USERNAME, email=ADMIN_EMAIL)
+        admin_user.set_password(ADMIN_PASSWORD)
+        admin_user.save()
 
-# Назначаем суперпользователем и персоналом
 admin_user.is_superuser = True
 admin_user.is_staff = True
 admin_user.is_active = True
+
+# Автоматически ищем поле роли/категории в модели accounts и ставим права админа
+for field_name in ['role', 'category', 'type', 'group', 'status']:
+    if hasattr(admin_user, field_name):
+        setattr(admin_user, field_name, 'admin') # или 'administrator' / 'staff'
+        print(f"Установлено поле {field_name} = 'admin'")
+
 admin_user.set_password(ADMIN_PASSWORD)
-
-# Если в вашей модели пользователя есть поле роли/категории (например, role, category, status):
-# Укажите нужное имя поля и значение для админа (например, 'admin', 'преподаватель' и т.д.)
-if hasattr(admin_user, 'role'):
-    admin_user.role = 'admin'  # или другое значение вашей роли администратора
-elif hasattr(admin_user, 'category'):
-    admin_user.category = 'admin'
-
 admin_user.save()
-print(f"Администратор '{ADMIN_USERNAME}' успешно обновлен с правами суперпользователя!")
+print(f"Суперпользователь '{ADMIN_USERNAME}' успешно настроен")
 
-# 2. Данные для обычного пользователя (студента)
+
+# обычны1 пользователь
 USER_USERNAME = 'user1'
 USER_EMAIL = 'user1@example.com'
 USER_PASSWORD = 'user123'
 
-student_user, created = User.objects.get_or_create(username=USER_USERNAME, defaults={'email': USER_EMAIL})
-student_user.set_password(USER_PASSWORD)
+try:
+    regular_user = User.objects.get(username=USER_USERNAME)
+except User.DoesNotExist:
+    regular_user = User(username=USER_USERNAME, email=USER_EMAIL)
+    regular_user.set_password(USER_PASSWORD)
+    regular_user.save()
 
-if hasattr(student_user, 'role'):
-    student_user.role = 'student'
-elif hasattr(student_user, 'category'):
-    student_user.category = 'student'
+regular_user.is_superuser = False
+regular_user.is_staff = False
+regular_user.is_active = True
 
-student_user.save()
-print(f"Пользователь '{USER_USERNAME}' успешно обновлен/создан!")
+for field_name in ['role', 'category', 'type', 'group', 'status']:
+    if hasattr(regular_user, field_name):
+        setattr(regular_user, field_name, 'student')
+        print(f"Установлено поле {field_name} = 'student'")
+
+regular_user.set_password(USER_PASSWORD)
+regular_user.save()
+print(f"Обычный пользователь '{USER_USERNAME}' настроен")
