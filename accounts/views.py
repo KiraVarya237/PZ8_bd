@@ -8,7 +8,14 @@ from .models import AcademicGroup, Course, Department
 
 
 def is_methodist(user):
-    return user.groups.filter(name='Методист').exists()
+    if not user.is_authenticated:
+        return False
+    return (
+        user.is_superuser
+        or user.is_staff
+        or getattr(user, 'role', None) == 'admin'
+        or user.groups.filter(name='Методист').exists()
+    )
 
 
 @login_required
