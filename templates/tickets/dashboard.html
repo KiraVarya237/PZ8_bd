@@ -8,7 +8,6 @@
 
     <div id="message"></div>
 
-    <!-- Форма создания -->
     <div class="card mb-4">
         <div class="card-body">
             <form id="ticket-form">
@@ -43,5 +42,8 @@
     </div>
 </div>
 
+<script>
+    window.isMethodist = {{ is_methodist|yesno:"true,false" }};
+</script>
 <script src="{% static 'js/app.js' %}"></script>
 {% endblock %}

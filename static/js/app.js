@@ -62,6 +62,10 @@ async function loadTickets() {
             list.innerHTML = "<p class='text-muted'>Заявки не найдены</p>";
             return;
         }
+
+        // Проверяем, является ли пользователь методистом/админом (передается из шаблона Django)
+        const isMethodist = window.isMethodist === true;
+
         for (const ticket of tickets) {
             const row = document.createElement("div");
             row.className = "d-flex justify-content-between align-items-center border-bottom py-3 gap-3";
@@ -77,27 +81,27 @@ async function loadTickets() {
             statusBadge.textContent = ticket.status;
             controls.append(statusBadge);
 
-            // Кнопка перехода к следующему статусу
-            if (ticket.status === "new") {
-                const btn = document.createElement("button");
-                btn.className = "btn btn-sm btn-outline-warning";
-                btn.textContent = "В работу";
-                btn.onclick = () => changeStatus(ticket.id, "progress");
-                controls.append(btn);
-            } else if (ticket.status === "progress") {
-                const btn = document.createElement("button");
-                btn.className = "btn btn-sm btn-outline-success";
-                btn.textContent = "Завершить";
-                btn.onclick = () => changeStatus(ticket.id, "done");
-                controls.append(btn);
-            }
+            if (isMethodist) {
+                if (ticket.status === "new") {
+                    const btn = document.createElement("button");
+                    btn.className = "btn btn-sm btn-outline-warning";
+                    btn.textContent = "В работу";
+                    btn.onclick = () => changeStatus(ticket.id, "progress");
+                    controls.append(btn);
+                } else if (ticket.status === "progress") {
+                    const btn = document.createElement("button");
+                    btn.className = "btn btn-sm btn-outline-success";
+                    btn.textContent = "Завершить";
+                    btn.onclick = () => changeStatus(ticket.id, "done");
+                    controls.append(btn);
+                }
 
-            // Кнопка удаления
-            const deleteBtn = document.createElement("button");
-            deleteBtn.className = "btn btn-sm btn-outline-danger";
-            deleteBtn.textContent = "Удалить";
-            deleteBtn.onclick = () => deleteTicket(ticket.id, ticket.title);
-            controls.append(deleteBtn);
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "btn btn-sm btn-outline-danger";
+                deleteBtn.textContent = "Удалить";
+                deleteBtn.onclick = () => deleteTicket(ticket.id, ticket.title);
+                controls.append(deleteBtn);
+            }
 
             row.append(info, controls);
             list.append(row);
