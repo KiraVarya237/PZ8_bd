@@ -24,12 +24,28 @@ class TicketViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Ticket.objects.filter(
-            owner=self.request.user
-        ).select_related("category")
+        user = self.request.user
+
+        # Проверяем, является ли пользователь администратором, персоналом или методистом
+        is_admin_or_methodist = (
+                user.is_superuser
+                or user.is_staff
+                or getattr(user, 'role', None) == 'admin'
+                or getattr(user, 'role', None) == 'methodist'
+        )
+
+        # Если с правами администратора/методиста — показываем вообще все заявки
+        if is_admin_or_methodist:
+            queryset = Ticket.objects.all().select_related("category", "owner")
+        else:
+            # Обычный пользователь видит только свои
+            queryset = Ticket.objects.filter(owner=user).select_related("category")
+
+        # Фильтрация по статусу, если она передана в параметрах
         status = self.request.query_params.get("status")
         if status:
             queryset = queryset.filter(status=status)
+
         return queryset.order_by("-created_at")
 
     def perform_create(self, serializer):
